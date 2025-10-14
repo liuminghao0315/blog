@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmh.blog_project.dao.BlogDAO">
+
+    <resultMap id="blogResultMap" type="com.lmh.blog_project.dataobject.BlogDO">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="author_id" property="authorId"/>
+        <result column="content" property="content"/>
+        <result column="summary" property="summary"/>
+        <result column="gmt_created" property="gmtCreated"/>
+        <result column="gmt_modified" property="gmtModified"/>
+    </resultMap>
+
+    <resultMap id="blogWithUserNameResultMap" type="com.lmh.blog_project.dataobject.BlogWithUserNameDO">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="name" property="authorName"/>
+        <result column="content" property="content"/>
+        <result column="summary" property="summary"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="favorite_count" property="favoriteCount"/>
+        <result column="gmt_created" property="gmtCreated"/>
+        <result column="gmt_modified" property="gmtModified"/>
+        <result column="comment_count" property="commentCount" />
+        <result column="row_num" property="rowNum" />
+    </resultMap>
+
+    <insert id="add" parameterType="com.lmh.blog_project.dataobject.BlogDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO blog (`id`, `title`, `author_id`, `content`, `summary`, `gmt_created`, `gmt_modified`)
+        VALUES (#{id}, #{title}, #{authorId}, #{content}, #{summary}, now(), now())
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM blog WHERE `id` = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.lmh.blog_project.dataobject.BlogDO">
+        UPDATE blog
+        <set>
+            <if test="title != null">
+                `title` = #{title},
+            </if>
+            <if test="authorId != null">
+                `author_id` = #{authorId},
+            </if>
+            <if test="content != null">
+                `content` = #{content},
+            </if>
+            <if test="summary != null">
+                `summary` = #{summary},
+            </if>
+            `gmt_modified` = now()
+        </set>
+        WHERE `id` = #{id}
+    </update>
+
+    <select id="findAll" resultMap="blogResultMap">
+        SELECT * FROM `blog`
+    </select>
+
+    <select id="findById" resultMap="blogResultMap">
+        SELECT * FROM `blog`
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByIds" parameterType="java.util.List" resultMap="blogResultMap">
+        <if test="ids != null and !ids.isEmpty()">
+            SELECT * FROM `blog`
+            WHERE `id` IN
+            <foreach item="id" index="index" collection="ids" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        <if test="ids == null or ids.isEmpty()">
+            SELECT null
+        </if>
+    </select>
+
+    <select id="findByAuthorId" resultMap="blogResultMap">
+        SELECT * FROM `blog`
+        WHERE `author_id` = #{authorId}
+    </select>
+
+
+
+    <!--
+        // 以下是根据排序/筛选进行查，并且是在数据库中联立查询，而不是在java中进行嵌套循环拼接，up代表升序，down代表降序
+        -->
+    <select id="findSortByDate" resultMap="blogWithUserNameResultMap">
+        SELECT
+        b.id,
+        b.title,
+        u.name,
+        b.content,
+        b.summary,
+        b.gmt_created,
+        b.gmt_modified
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        <if test="favoriteUserId != null and favoriteUserId != ''">
+            LEFT JOIN favorite f2 ON b.id = f2.article_id
+        </if>
+        <where>
+            <if test="marchText != null and marchText != ''">
+                (
+                b.title LIKE CONCAT('%', #{marchText}, '%')
+                OR b.summary LIKE CONCAT('%', #{marchText}, '%')
+                OR u.name LIKE CONCAT('%', #{marchText}, '%')
+                OR b.content LIKE CONCAT('%', #{marchText}, '%')
+                )
+            </if>
+            <if test="myBlogUserId != null and myBlogUserId != ''">
+                AND b.author_id = #{myBlogUserId}
+            </if>
+            <if test="favoriteUserId != null and favoriteUserId != ''">
+                AND f2.user_id = #{favoriteUserId}
+            </if>
+        </where>
+        ORDER BY b.gmt_modified
+        <choose>
+            <when test="sortFlag == 'up'">
+                ASC
+            </when>
+            <when test="sortFlag == 'down'">
+                DESC
+            </when>
+        </choose>
+    </select>
+
+    <select id="findSortByLike" resultMap="blogWithUserNameResultMap">
+        SELECT
+        b.id,
+        b.title,
+        u.name,
+        b.content,
+        b.summary,
+        b.gmt_created,
+        b.gmt_modified,
+        IFNULL(lc.like_count, 0) AS like_count
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        LEFT JOIN (
+        SELECT
+        article_id,
+        COUNT(CASE WHEN increment_num = 1 THEN 1 END) - COUNT(CASE WHEN increment_num = -1 THEN 1 END) AS like_count
+        FROM article_likes
+        GROUP BY article_id
+        ) lc ON b.id = lc.article_id
+        <if test="favoriteUserId != null and favoriteUserId != ''">
+            LEFT JOIN favorite f2 ON b.id = f2.article_id
+        </if>
+        <where>
+            <if test="marchText != null and marchText != ''">
+                (
+                b.title LIKE CONCAT('%', #{marchText}, '%')
+                OR b.summary LIKE CONCAT('%', #{marchText}, '%')
+                OR u.name LIKE CONCAT('%', #{marchText}, '%')
+                OR b.content LIKE CONCAT('%', #{marchText}, '%')
+                )
+            </if>
+            <if test="myBlogUserId != null and myBlogUserId != ''">
+                AND b.author_id = #{myBlogUserId}
+            </if>
+            <if test="favoriteUserId != null and favoriteUserId != ''">
+                AND f2.user_id = #{favoriteUserId}
+            </if>
+        </where>
+        ORDER BY like_count
+        <choose>
+            <when test="sortFlag == 'up'">ASC</when>
+            <when test="sortFlag == 'down'">DESC</when>
+        </choose>
+    </select>
+
+
+    <select id="findSortByFavorite" resultMap="blogWithUserNameResultMap">
+        SELECT
+        b.id,
+        b.title,
+        u.name,
+        b.content,
+        b.summary,
+        b.gmt_created,
+        b.gmt_modified,
+        IFNULL(fc.favorite_count, 0) AS favorite_count
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        LEFT JOIN (
+        SELECT
+        article_id,
+        COUNT(*) AS favorite_count
+        FROM favorite
+        GROUP BY article_id
+        ) fc ON b.id = fc.article_id
+        <if test="favoriteUserId != null and favoriteUserId != ''">
+            LEFT JOIN favorite f2 ON b.id = f2.article_id
+        </if>
+        <where>
+            <if test="marchText != null and marchText != ''">
+                (
+                b.title   LIKE CONCAT('%', #{marchText}, '%')
+                OR b.summary LIKE CONCAT('%', #{marchText}, '%')
+                OR u.name LIKE CONCAT('%', #{marchText}, '%')
+                OR b.content LIKE CONCAT('%', #{marchText}, '%')
+                )
+            </if>
+            <if test="myBlogUserId != null and myBlogUserId != ''">
+                AND b.author_id = #{myBlogUserId}
+            </if>
+            <if test="favoriteUserId != null and favoriteUserId != ''">
+                AND f2.user_id = #{favoriteUserId}
+            </if>
+        </where>
+        ORDER BY fc.favorite_count
+        <choose>
+            <when test="sortFlag == 'up'">ASC</when>
+            <when test="sortFlag == 'down'">DESC</when>
+        </choose>
+    </select>
+
+    <select id="findSortByComment" resultMap="blogWithUserNameResultMap">
+        SELECT
+        b.id,
+        b.title,
+        u.name,
+        b.content,
+        b.summary,
+        b.gmt_created,
+        b.gmt_modified,
+        IFNULL(cc.comment_count, 0) AS comment_count
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        LEFT JOIN (
+        SELECT
+        article_id,
+        COUNT(*) AS comment_count
+        FROM comment
+        GROUP BY article_id
+        ) cc ON b.id = cc.article_id
+        <if test="favoriteUserId != null and favoriteUserId != ''">
+            LEFT JOIN favorite f2 ON b.id = f2.article_id
+        </if>
+        <where>
+            <if test="marchText != null and marchText != ''">
+                (
+                b.title   LIKE CONCAT('%', #{marchText}, '%')
+                OR b.summary LIKE CONCAT('%', #{marchText}, '%')
+                OR u.name LIKE CONCAT('%', #{marchText}, '%')
+                OR b.content LIKE CONCAT('%', #{marchText}, '%')
+                )
+            </if>
+            <if test="myBlogUserId != null and myBlogUserId != ''">
+                AND b.author_id = #{myBlogUserId}
+            </if>
+            <if test="favoriteUserId != null and favoriteUserId != ''">
+                AND f2.user_id = #{favoriteUserId}
+            </if>
+        </where>
+        ORDER BY cc.comment_count
+        <choose>
+            <when test="sortFlag == 'up'">ASC</when>
+            <when test="sortFlag == 'down'">DESC</when>
+        </choose>
+    </select>
+
+
+
+<!--    当前端Detail点击 上一篇文章 或 下一篇文章 的时候，返回的文章对象-->
+
+<!--    收藏量-->
+    <select id="findSortedIdsRelyOnFavorite" resultType="java.lang.String">
+        SELECT
+        b.id
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        LEFT JOIN (
+        SELECT
+        article_id,
+        COUNT(*) AS favorite_count
+        FROM favorite
+        GROUP BY article_id
+        ) fc ON b.id = fc.article_id
+        <if test="favoriteUserId != null and favoriteUserId != ''">
+            LEFT JOIN favorite f2 ON b.id = f2.article_id
+        </if>
+        <where>
+            <if test="marchText != null and marchText != ''">
+                (
+                b.title   LIKE CONCAT('%', #{marchText}, '%')
+                OR b.summary LIKE CONCAT('%', #{marchText}, '%')
+                OR u.name LIKE CONCAT('%', #{marchText}, '%')
+                OR b.content LIKE CONCAT('%', #{marchText}, '%')
+                )
+            </if>
+            <if test="myBlogUserId != null and myBlogUserId != ''">
+                AND b.author_id = #{myBlogUserId}
+            </if>
+            <if test="favoriteUserId != null and favoriteUserId != ''">
+                AND f2.user_id = #{favoriteUserId}
+            </if>
+        </where>
+        ORDER BY fc.favorite_count
+        <choose>
+            <when test="sortFlag == 'up'">ASC</when>
+            <when test="sortFlag == 'down'">DESC</when>
+        </choose>
+    </select>
+
+    <select id="findSortedRelyOnFavoriteById" resultMap="blogWithUserNameResultMap">
+        SELECT
+        b.id,
+        b.title,
+        u.name,
+        b.content,
+        b.summary,
+        b.gmt_created,
+        b.gmt_modified,
+        IFNULL(fc.favorite_count, 0) AS favorite_count
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        LEFT JOIN (
+        SELECT
+        article_id,
+        COUNT(*) AS favorite_count
+        FROM favorite
+        GROUP BY article_id
+        ) fc ON b.id = fc.article_id
+        WHERE b.id = #{blogId}
+        ORDER BY fc.favorite_count
+        <choose>
+            <when test="sortFlag == 'up'">ASC</when>
+            <when test="sortFlag == 'down'">DESC</when>
+        </choose>
+    </select>
+
+
+
+<!--    点赞量-->
+    <select id="findSortedIdsRelyOnLike" resultType="java.lang.String">
+        SELECT
+        b.id,
+        IFNULL(lc.like_count, 0) AS like_count
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        LEFT JOIN (
+        SELECT
+        article_id,
+        SUM(CASE
+        WHEN increment_num = 1 THEN 1
+        WHEN increment_num = -1 THEN -1
+        ELSE 0
+        END) AS like_count
+        FROM article_likes
+        GROUP BY article_id
+        ) lc ON b.id = lc.article_id
+        <if test="favoriteUserId != null and favoriteUserId != ''">
+            LEFT JOIN favorite f2 ON b.id = f2.article_id
+        </if>
+        <where>
+            <if test="marchText != null and marchText != ''">
+                (
+                b.title   LIKE CONCAT('%', #{marchText}, '%')
+                OR b.summary LIKE CONCAT('%', #{marchText}, '%')
+                OR u.name LIKE CONCAT('%', #{marchText}, '%')
+                OR b.content LIKE CONCAT('%', #{marchText}, '%')
+                )
+            </if>
+            <if test="myBlogUserId != null and myBlogUserId != ''">
+                AND b.author_id = #{myBlogUserId}
+            </if>
+            <if test="favoriteUserId != null and favoriteUserId != ''">
+                AND f2.user_id = #{favoriteUserId}
+            </if>
+        </where>
+        ORDER BY lc.like_count
+        <choose>
+            <when test="sortFlag == 'up'">ASC</when>
+            <when test="sortFlag == 'down'">DESC</when>
+        </choose>
+    </select>
+
+    <select id="findSortedRelyOnLikeById" resultMap="blogWithUserNameResultMap">
+        SELECT
+        b.id,
+        b.title,
+        u.name,
+        b.content,
+        b.summary,
+        b.gmt_created,
+        b.gmt_modified,
+        IFNULL(lc.like_count, 0) AS like_count
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        LEFT JOIN (
+        SELECT
+        article_id,
+        SUM(CASE
+        WHEN increment_num = 1 THEN 1
+        WHEN increment_num = -1 THEN -1
+        ELSE 0
+        END) AS like_count
+        FROM article_likes
+        GROUP BY article_id
+        ) lc ON b.id = lc.article_id
+        WHERE b.id = #{blogId}
+        ORDER BY lc.like_count
+        <choose>
+            <when test="sortFlag == 'up'">ASC</when>
+            <when test="sortFlag == 'down'">DESC</when>
+        </choose>
+    </select>
+
+
+<!--    评论数-->
+    <select id="findSortedIdsRelyOnComment" resultType="java.lang.String">
+        SELECT
+        b.id,
+        IFNULL(cc.comment_count, 0) AS comment_count
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        LEFT JOIN (
+        SELECT
+        article_id,
+        COUNT(*) AS comment_count
+        FROM comment
+        GROUP BY article_id
+        ) cc ON b.id = cc.article_id
+        <if test="favoriteUserId != null and favoriteUserId != ''">
+            LEFT JOIN favorite f2 ON b.id = f2.article_id
+        </if>
+        <where>
+            <if test="marchText != null and marchText != ''">
+                (
+                b.title   LIKE CONCAT('%', #{marchText}, '%')
+                OR b.summary LIKE CONCAT('%', #{marchText}, '%')
+                OR u.name LIKE CONCAT('%', #{marchText}, '%')
+                OR b.content LIKE CONCAT('%', #{marchText}, '%')
+                )
+            </if>
+            <if test="myBlogUserId != null and myBlogUserId != ''">
+                AND b.author_id = #{myBlogUserId}
+            </if>
+            <if test="favoriteUserId != null and favoriteUserId != ''">
+                AND f2.user_id = #{favoriteUserId}
+            </if>
+        </where>
+        ORDER BY cc.comment_count
+        <choose>
+            <when test="sortFlag == 'up'">ASC</when>
+            <when test="sortFlag == 'down'">DESC</when>
+        </choose>
+    </select>
+
+    <select id="findSortedRelyOnCommentById" resultMap="blogWithUserNameResultMap">
+        SELECT
+        b.id,
+        b.title,
+        u.name,
+        b.content,
+        b.summary,
+        b.gmt_created,
+        b.gmt_modified,
+        IFNULL(cc.comment_count, 0) AS comment_count
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        LEFT JOIN (
+        SELECT
+        article_id,
+        COUNT(*) AS comment_count
+        FROM comment
+        GROUP BY article_id
+        ) cc ON b.id = cc.article_id
+        WHERE b.id = #{blogId}
+        ORDER BY cc.comment_count
+        <choose>
+            <when test="sortFlag == 'up'">ASC</when>
+            <when test="sortFlag == 'down'">DESC</when>
+        </choose>
+    </select>
+
+
+
+<!--    发布时间-->
+    <select id="findSortedIdsRelyOnDate" resultType="java.lang.String">
+        SELECT
+        b.id
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        <if test="favoriteUserId != null and favoriteUserId != ''">
+            LEFT JOIN favorite f2 ON b.id = f2.article_id
+        </if>
+        <where>
+            <if test="marchText != null and marchText != ''">
+                (
+                b.title LIKE CONCAT('%', #{marchText}, '%')
+                OR b.summary LIKE CONCAT('%', #{marchText}, '%')
+                OR u.name LIKE CONCAT('%', #{marchText}, '%')
+                OR b.content LIKE CONCAT('%', #{marchText}, '%')
+                )
+            </if>
+            <if test="myBlogUserId != null and myBlogUserId != ''">
+                AND b.author_id = #{myBlogUserId}
+            </if>
+            <if test="favoriteUserId != null and favoriteUserId != ''">
+                AND f2.user_id = #{favoriteUserId}
+            </if>
+        </where>
+        ORDER BY b.gmt_modified
+        <choose>
+            <when test="sortFlag == 'up'">
+                ASC
+            </when>
+            <when test="sortFlag == 'down'">
+                DESC
+            </when>
+        </choose>
+    </select>
+
+
+    <select id="findSortedRelyOnDateById" resultMap="blogWithUserNameResultMap">
+        SELECT
+        b.id,
+        b.title,
+        u.name,
+        b.content,
+        b.summary,
+        b.gmt_created,
+        b.gmt_modified
+        FROM blog b
+        LEFT JOIN user u ON b.author_id = u.id
+        WHERE b.id = #{blogId}
+        ORDER BY b.gmt_modified
+        <choose>
+            <when test="sortFlag == 'up'">
+                ASC
+            </when>
+            <when test="sortFlag == 'down'">
+                DESC
+            </when>
+        </choose>
+    </select>
+</mapper>

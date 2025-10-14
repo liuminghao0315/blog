@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmh.blog_project.dao.CommentDAO">
+
+    <resultMap id="commentResultMap" type="com.lmh.blog_project.dataobject.CommentDO">
+        <id column="id" property="id"/>
+        <result column="article_id" property="articleId"/>
+        <result column="author_id" property="authorId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="root_id" property="rootId"/>
+        <result column="content" property="content"/>
+        <result column="gmt_created" property="gmtCreated"/>
+        <result column="gmt_modified" property="gmtModified"/>
+    </resultMap>
+
+    <resultMap id="commentWithUserNameAndAvatarUrlResultMap" type="com.lmh.blog_project.dataobject.CommentWithUserNameAndAvatarUrlDO">
+        <id column="id" property="id"/>
+        <result column="article_id" property="articleId"/>
+        <result column="author_id" property="authorId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="root_id" property="rootId"/>
+        <result column="content" property="content"/>
+        <result column="gmt_created" property="gmtCreated"/>
+        <result column="gmt_modified" property="gmtModified"/>
+
+        <!-- 只映射 user 表中的 name 字段 -->
+        <result column="name" property="userName"/>
+
+        <!-- 只映射 user_profile 表中的 avatar_url 字段 -->
+        <result column="avatar_url" property="avatarUrl"/>
+
+        <!-- 映射 comment_likes 表中的 字段 -->
+        <association property="commentLikesDTO" javaType="com.lmh.blog_project.dto.CommentLikesDTO">
+            <result column="my_increment" property="myIncrement"/>
+            <result column="likes_num" property="likesNum"/>
+        </association>
+
+    </resultMap>
+
+    <insert id="add" parameterType="com.lmh.blog_project.dataobject.BlogDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `comment` (`id`, `article_id`, `author_id`, `parent_id`, `root_id`, `content`, `gmt_created`, `gmt_modified`)
+        VALUES (#{id}, #{articleId}, #{authorId}, #{parentId}, #{rootId}, #{content}, now(), now())
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM `comment` WHERE `id` = #{id}
+    </delete>
+
+    <delete id="deleteByRootId">
+        DELETE FROM `comment` WHERE `root_id` = #{rootId} OR `id` = #{rootId}
+    </delete>
+
+    <delete id="deleteByParentId">
+        WITH RECURSIVE DeleteChildren AS (
+            SELECT `id` FROM `comment` WHERE `id` = #{parentId}
+
+            UNION ALL
+
+            SELECT c.id
+            FROM `comment` c
+                     INNER JOIN DeleteChildren dc ON c.parent_id = dc.id
+        )
+        DELETE FROM `comment` WHERE `id` IN (SELECT `id` FROM DeleteChildren);
+    </delete>
+
+    <delete id="deleteByArticleId">
+        DELETE FROM `comment` WHERE `article_id` = #{articleId}
+    </delete>
+
+    <delete id="deleteByAuthorId">
+        DELETE FROM `comment` WHERE `author_id` = #{authorId}
+    </delete>
+
+    <update id="update" parameterType="com.lmh.blog_project.dataobject.CommentDO">
+        UPDATE `comment`
+        <set>
+            <if test="articleId != null">
+                `article_id` = #{articleId},
+            </if>
+            <if test="authorId != null">
+                `author_id` = #{authorId},
+            </if>
+            <if test="parentId != null">
+                `parent_id` = #{parentId},
+            </if>
+            <if test="rootId != null">
+                `root_id` = #{rootId},
+            </if>
+            <if test="content != null">
+                `content` = #{content},
+            </if>
+            `gmt_modified` = now()
+        </set>
+        WHERE `id` = #{id}
+    </update>
+
+    <select id="findAll" resultMap="commentResultMap">
+        SELECT * FROM `comment`
+    </select>
+
+    <select id="findById" resultMap="commentResultMap">
+        SELECT * FROM `comment`
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByArticleId" resultMap="commentResultMap">
+        SELECT * FROM `comment`
+        WHERE article_id = #{articleId}
+    </select>
+
+    <select id="findWithUserNameAndAvatarUrlDOByArticleId" resultMap="commentWithUserNameAndAvatarUrlResultMap">
+        SELECT
+            `comment`.*,
+            `user`.name,
+            `user_profile`.avatar_url,
+            (SELECT COUNT(*) FROM `comment_likes` cl WHERE cl.comment_id = `comment`.id AND cl.increment_num = 1) -
+            (SELECT COUNT(*) FROM `comment_likes` cl WHERE cl.comment_id = `comment`.id AND cl.increment_num = -1) AS likes_num,
+            IFNULL(
+                    (SELECT cl.increment_num FROM `comment_likes` cl WHERE cl.comment_id = `comment`.id AND cl.user_id = #{userId} LIMIT 1),
+            0
+        ) AS my_increment
+        FROM
+            `comment`
+                LEFT JOIN `user` ON `comment`.author_id = `user`.id
+                LEFT JOIN `user_profile` ON `user`.id = `user_profile`.user_id
+        WHERE
+            `comment`.article_id = #{articleId}
+    </select>
+
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmh.blog_project.dao.FavoriteDAO">
+
+    <resultMap id="favoriteLikesResultMap" type="com.lmh.blog_project.dataobject.FavoriteDO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="article_id" property="articleId"/>
+        <result column="gmt_created" property="gmtCreated"/>
+        <result column="gmt_modified" property="gmtModified"/>
+    </resultMap>
+
+    <insert id="add" parameterType="com.lmh.blog_project.dataobject.FavoriteDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `favorite` (`id`, `user_id`, `article_id`,  `gmt_created`, `gmt_modified`)
+        VALUES (#{id}, #{userId}, #{articleId},  now(), now())
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM `favorite` WHERE `article_id` = #{articleId} AND `user_id` = #{userId}
+    </delete>
+
+    <delete id="deleteByArticleId">
+        DELETE FROM `favorite` WHERE `article_id` = #{articleId}
+    </delete>
+
+    <select id="findFavoriteCountByArticleId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM `favorite`
+        WHERE `article_id` = #{articleId}
+    </select>
+
+    <select id="findIfUserFavorite" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM `favorite`
+        WHERE `user_id` = #{userId} AND `article_id` = #{articleId}
+    </select>
+
+    <select id="findArticleIdsByUserId" resultType="java.lang.String">
+        SELECT `article_id`
+        FROM `favorite`
+        WHERE `user_id` = #{userId}
+    </select>
+
+</mapper>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmh.blog_project.dao.ArticleLikesDAO">
+
+    <resultMap id="articleLikesResultMap" type="com.lmh.blog_project.dataobject.ArticleLikesDO">
+        <id column="id" property="id"/>
+        <result column="article_id" property="articleId"/>
+        <result column="user_id" property="userId"/>
+        <result column="increment_num" property="incrementNum"/>
+        <result column="gmt_created" property="gmtCreated"/>
+        <result column="gmt_modified" property="gmtModified"/>
+    </resultMap>
+
+    <insert id="add" parameterType="com.lmh.blog_project.dataobject.ArticleLikesDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `article_likes` (`id`, `article_id`, `user_id`, `increment_num`,  `gmt_created`, `gmt_modified`)
+        VALUES (#{id}, #{articleId}, #{userId}, #{incrementNum},  now(), now())
+    </insert>
+
+    <delete id="deleteWhenCancel">
+        DELETE FROM `article_likes` WHERE `article_id` = #{articleId} AND `user_id` = #{userId}
+    </delete>
+
+    <delete id="deleteWhenDeleteArticle">
+        DELETE FROM `article_likes` WHERE `article_id` = #{articleId}
+    </delete>
+
+    <select id="findByArticleId" resultType="java.lang.Integer">
+        SELECT
+            (SELECT COUNT(*) FROM `article_likes` WHERE `article_id` = #{articleId} AND `increment_num` = 1) -
+            (SELECT COUNT(*) FROM `article_likes` WHERE `article_id` = #{articleId} AND `increment_num` = -1)
+    </select>
+
+    <select id="findMyIncrementInTheArticle" resultType="java.lang.Integer">
+        SELECT `increment_num` FROM `article_likes`
+        WHERE `article_id` = #{articleId} AND `user_id` = #{userId}
+    </select>
+
+    <update id="update">
+        UPDATE article_likes
+        <set>
+            <if test="incrementNum != null">
+                increment_num = #{incrementNum},
+            </if>
+            gmt_modified = now()
+        </set>
+        WHERE article_id = #{articleId} AND user_id = #{userId}
+    </update>
+</mapper>

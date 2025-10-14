@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmh.blog_project.dao.CommentLikesDAO">
+
+    <resultMap id="commentLikesResultMap" type="com.lmh.blog_project.dataobject.CommentLikesDO">
+        <id column="id" property="id"/>
+        <result column="comment_id" property="commentId"/>
+        <result column="user_id" property="userId"/>
+        <result column="increment_num" property="incrementNum"/>
+        <result column="gmt_created" property="gmtCreated"/>
+        <result column="gmt_modified" property="gmtModified"/>
+    </resultMap>
+
+    <insert id="add" parameterType="com.lmh.blog_project.dataobject.CommentLikesDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `comment_likes` (`id`, `comment_id`, `user_id`, `increment_num`,  `gmt_created`, `gmt_modified`)
+        VALUES (#{id}, #{commentId}, #{userId}, #{incrementNum},  now(), now())
+    </insert>
+
+    <delete id="deleteWhenCancel">
+        DELETE FROM `comment_likes` WHERE `comment_id` = #{commentId} AND `user_id` = #{userId}
+    </delete>
+
+    <delete id="deleteWhenDeleteRootComment">
+        DELETE FROM `comment_likes` WHERE
+            `comment_id` = #{commentId}
+               OR `comment_id` IN (
+                    SELECT `id` FROM `comment` WHERE `root_id` = #{commentId}
+                  )
+    </delete>
+
+    <delete id="deleteWhenDeleteNonRootComment">
+        WITH RECURSIVE DeleteChildren AS (
+            SELECT `id` FROM `comment` WHERE `id` = #{commentId}
+
+            UNION ALL
+
+            SELECT c.id
+            FROM `comment` c
+                     INNER JOIN DeleteChildren dc ON c.parent_id = dc.id
+        )
+        DELETE FROM `comment_likes`
+        WHERE `comment_id` = #{commentId}
+           OR `comment_id` IN (
+            SELECT IFNULL(id, 0) FROM DeleteChildren
+        );
+    </delete>
+
+    <delete id="deleteWhenDeleteArticle">
+        DELETE FROM `comment_likes`
+        WHERE `comment_id` IN (
+            SELECT IFNULL(id, 0)
+            FROM `comment`
+            WHERE `article_id` = #{articleId}
+        )
+    </delete>
+
+    <update id="update">
+        UPDATE `comment_likes`
+        <set>
+            <if test="incrementNum != null">
+                `increment_num` = #{incrementNum},
+            </if>
+            `gmt_modified` = now()
+        </set>
+        WHERE `comment_id` = #{commentId} AND `user_id` = #{userId}
+    </update>
+
+</mapper>

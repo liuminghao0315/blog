@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmh.blog_project.dao.UserProfileDAO">
+
+    <resultMap id="userProfileResultMap" type="com.lmh.blog_project.dataobject.UserProfileDO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="gender" property="gender"/>
+        <result column="signature" property="signature"/>
+        <result column="birthday" property="birthday"/>
+        <result column="gmt_created" property="gmtCreated"/>
+        <result column="gmt_modified" property="gmtModified"/>
+    </resultMap>
+
+    <insert id="add" parameterType="com.lmh.blog_project.dataobject.UserProfileDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_profile (`id`, `user_id`, `avatar_url`,`gender`,`signature`,`birthday`, `gmt_created`, `gmt_modified`)
+        VALUES (#{id}, #{userId}, #{avatarUrl}, #{gender},#{signature},#{birthday}, now(), now())
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM user_profile WHERE `id` = #{id}
+    </delete>
+
+    <delete id="deleteByUserId">
+        DELETE FROM user_profile WHERE `user_id` = #{userId}
+    </delete>
+
+    <update id="update" parameterType="com.lmh.blog_project.dataobject.UserProfileDO">
+        UPDATE user_profile
+        <set>
+            <if test="userId != null">
+                `user_id` = #{userId},
+            </if>
+            `avatar_url` = #{avatarUrl},
+            <if test="gender != null">
+                `gender` = #{gender},
+            </if>
+            `signature` = #{signature},
+            `birthday` = #{birthday},
+            `gmt_modified` = now()
+        </set>
+        WHERE `id` = #{id}
+    </update>
+
+    <select id="findAll" resultMap="userProfileResultMap">
+        SELECT * FROM user_profile
+    </select>
+
+    <select id="findById" resultMap="userProfileResultMap">
+        SELECT * FROM user_profile
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByUserId" resultMap="userProfileResultMap">
+        SELECT * FROM user_profile
+        WHERE user_id = #{userId}
+    </select>
+
+</mapper>

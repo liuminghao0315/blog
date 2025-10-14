@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmh.blog_project.dao.UserDAO">
+
+    <resultMap id="userResultMap" type="com.lmh.blog_project.dataobject.UserDO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="password" property="password"/>
+        <result column="authority" property="authority"/>
+        <result column="gmt_created" property="gmtCreated"/>
+        <result column="gmt_modified" property="gmtModified"/>
+    </resultMap>
+
+    <resultMap id="userWithAvatarUrlResultMap" type="com.lmh.blog_project.dataobject.UserWithAvatarUrlDO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="password" property="password"/>
+        <result column="authority" property="authority"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="gmt_created" property="gmtCreated"/>
+        <result column="gmt_modified" property="gmtModified"/>
+    </resultMap>
+
+    <insert id="add" parameterType="com.lmh.blog_project.dataobject.UserDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (`id`, `name`, `password`,`authority`, `gmt_created`, `gmt_modified`)
+        VALUES (#{id}, #{name}, #{password}, #{authority}, now(), now())
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM user WHERE `id` = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.lmh.blog_project.dataobject.UserDO">
+        UPDATE user
+        <set>
+            <if test="name != null">
+                `name` = #{name},
+            </if>
+            <if test="password != null">
+                `password` = #{password},
+            </if>
+            <if test="authority != null">
+                `authority` = #{authority},
+            </if>
+            `gmt_modified` = now()
+        </set>
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateNameById">
+        UPDATE user SET `name`=#{name} WHERE `id` = #{id}
+    </update>
+
+    <select id="findAll" resultMap="userResultMap">
+        SELECT * FROM user
+    </select>
+
+    <select id="findById" resultMap="userResultMap">
+        SELECT * FROM user
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByName" resultMap="userResultMap">
+        SELECT * FROM user
+        WHERE name = #{name}
+        LIMIT 1
+    </select>
+
+    <select id="findWithAvatarUrlByName" resultMap="userWithAvatarUrlResultMap">
+        SELECT `user`.*, `user_profile`.avatar_url
+        FROM
+        `user` LEFT JOIN `user_profile` ON `user`.id = `user_profile`.user_id
+        WHERE `user`.name = #{name}
+    </select>
+
+</mapper>
