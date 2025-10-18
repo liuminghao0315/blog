@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts" name="Login">
-    import { ref, onMounted, watch } from 'vue'
+    import { ref, onMounted, watch, inject } from 'vue'
     import { useRoute } from 'vue-router'
     import axios from 'axios'
     import { type RegisterOrLoginForm } from '@/types'
@@ -34,6 +34,8 @@
     import { useRegisterInfoStore } from '@/store/registerInfo'
     import { useLoginInfoStore } from '@/store/loginInfo'
     import { useOverallFunctionStore } from '@/store/overallFunction'
+
+    const baseUrl = inject('baseUrl')
 
     const route = useRoute()
     const overallFunctionStore = useOverallFunctionStore()
@@ -66,7 +68,7 @@
             return;
         }
         try {
-            let token = (await axios.post("http://localhost:8080/login", {
+            let token = (await axios.post(baseUrl+"/login", {
                 userName: formJs.value.userName,
                 password: formJs.value.password
             })).data
@@ -82,7 +84,7 @@
                 loginInfoStore.password = "";
                 localStorage.setItem("token", token)
                 console.log("返回数据（token）：", token)
-                let userData = (await axios.get("http://localhost:8080/db/user/findbytoken", {
+                let userData = (await axios.get(baseUrl+"/db/user/findbytoken", {
                     headers: {
                         token
                     }
@@ -94,7 +96,7 @@
                 userDataStore.userData.name = userData.name;
                 userDataStore.userData.gmtCreated = userData.gmtCreated;
                 userDataStore.userData.gmtModified = userData.gmtModified;
-                userDataStore.userData.avatarUrl = (await axios.get("http://localhost:8080/userprofile?name="+userData.name)).data.avatarUrl
+                userDataStore.userData.avatarUrl = (await axios.get(baseUrl+"/userprofile?name="+userData.name)).data.avatarUrl
                 console.log("现在pinia:", userDataStore.userData)
                 alert("登录成功！")
                 refreshCountStore.login_to_home_count = 0
@@ -106,7 +108,7 @@
     }
 
     async function testToken() {
-        let token = (await axios.get("http://localhost:8080/loginToken", {
+        let token = (await axios.get(baseUrl+"/loginToken", {
             headers: {
                 token: localStorage.getItem('token') || ''
             }

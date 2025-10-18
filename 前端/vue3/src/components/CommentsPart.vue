@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts" name="CommentsPart">
-    import { ref, onMounted, onBeforeMount, type StyleValue, onUnmounted, provide, watch } from 'vue'
+    import { ref, onMounted, onBeforeMount, type StyleValue, onUnmounted, provide, watch, inject } from 'vue'
     import { type StructuredComments, type CommentDO } from "@/types"
     import axios from 'axios'
     import { MdPreview } from 'md-editor-v3'
@@ -30,6 +30,8 @@
     import AGroupOfComments from './AGroupOfComments.vue'
     import isEmpty from '@/utils/isEmpty'
     import emitter from '@/utils/emitter'
+
+    const baseUrl = inject('baseUrl')
 
     const commentInput = ref("")
     const router = useRouter();
@@ -62,7 +64,7 @@
             authorId: userData.id,
             content: commentInput.value
         }
-        const responseMsg = (await axios.post("http://localhost:8080/db/commnet/add", requestBody)).data;
+        const responseMsg = (await axios.post(baseUrl+"/db/commnet/add", requestBody)).data;
         if (responseMsg == 1) {
             alert("发送成功");
             await getComments();
@@ -73,7 +75,7 @@
     }
 
     async function getComments() {
-        const comments = (await axios.get("http://localhost:8080/findStructuredCommentWithUserNameAndAvatarUrl", {
+        const comments = (await axios.get(baseUrl+"/findStructuredCommentWithUserNameAndAvatarUrl", {
             params: {
                 articleId: id,
                 userId: userData.id,

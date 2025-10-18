@@ -134,7 +134,17 @@ type Paging = {
     pageSize: number,
     totalPage: number,
     totalCount: number,
-    data:any[],
+    data: any[],
 }
 
-export { type Blog, type User, type BlogWithUserName, type RegisterOrLoginForm, type UserProfile, type UserProfileWithUserName, type StructuredComments, type UserWithAvatarUrl, type CommentDO, type ArticleLikesDTO, type ArticleLikes, type CommentLikesDTO, type CommentLikes, type Favorite, type FavoriteDTO, type Paging };
+type BlogsImages = {
+    id:string;
+    authorId:string;
+    blogId:string;
+    fileName:string;
+    status:string;
+    gmtCreated:string;
+    gmtModified:string;
+}
+
+export { type Blog, type User, type BlogWithUserName, type RegisterOrLoginForm, type UserProfile, type UserProfileWithUserName, type StructuredComments, type UserWithAvatarUrl, type CommentDO, type ArticleLikesDTO, type ArticleLikes, type CommentLikesDTO, type CommentLikes, type Favorite, type FavoriteDTO, type Paging, type BlogsImages };

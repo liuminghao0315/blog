@@ -52,6 +52,8 @@
     import { storeToRefs } from 'pinia'
     import emitter from '@/utils/emitter'
 
+    const baseUrl = inject('baseUrl')
+
     let structuredComments = inject("structuredComments-ref", ref())
 
     emitter.on('click-non-head-comment-reply-btn', () => {
@@ -177,10 +179,10 @@
     async function deleteComment() {
         // emitter.emit('click-non-head-comment-reply-btn')
         await deleteWhenDeleteNonRootComment();
-        const responseMsg = (await axios.get(`http://localhost:8080/db/comment/deleteByParentId?id=${oneCommentObj.id}`)).data
+        const responseMsg = (await axios.get(`${baseUrl}/db/comment/deleteByParentId?id=${oneCommentObj.id}`)).data
         if (responseMsg > 0) {
             alert("删除成功");
-            const newContents = (await axios.get("http://localhost:8080/findStructuredCommentWithUserNameAndAvatarUrl?articleId=" + oneCommentObj.articleId)).data
+            const newContents = (await axios.get(baseUrl+"/findStructuredCommentWithUserNameAndAvatarUrl?articleId=" + oneCommentObj.articleId)).data
             structuredComments.value.splice(0, structuredComments.value.length);
             structuredComments.value.push(...newContents)
             // emitter.emit('update-a-group-of-comments', JSON.stringify(newContents))
@@ -287,11 +289,11 @@
             userId: userData.value.id,
             incrementNum,
         };
-        return (await axios.post("http://localhost:8080/db/commentLikes/add", commentLikes)).data;
+        return (await axios.post(baseUrl+"/db/commentLikes/add", commentLikes)).data;
     }
 
     async function deleteWhenCancel() {
-        return (await axios.get("http://localhost:8080/db/commentLikes/deleteWhenCancel", {
+        return (await axios.get(baseUrl+"/db/commentLikes/deleteWhenCancel", {
             params: {
                 commentId: oneCommentObj.id,
                 userId: userData.value.id,
@@ -300,7 +302,7 @@
     }
 
     async function deleteWhenDeleteNonRootComment() {
-        return (await axios.get("http://localhost:8080/db/commentLikes/deleteWhenDeleteNonRootComment", {
+        return (await axios.get(baseUrl+"/db/commentLikes/deleteWhenDeleteNonRootComment", {
             params: {
                 commentId: oneCommentObj.id,
             }
@@ -308,7 +310,7 @@
     }
 
     async function update(incrementNum: number) {
-        return (await axios.get("http://localhost:8080/db/commentLikes/update", {
+        return (await axios.get(baseUrl+"/db/commentLikes/update", {
             params: {
                 commentId: oneCommentObj.id,
                 userId: userData.value.id,

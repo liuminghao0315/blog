@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts" name="UserSpace">
-    import { ref, onUpdated, onMounted, onBeforeMount, toRefs, computed } from 'vue'
+    import { ref, onUpdated, onMounted, onBeforeMount, toRefs, computed, inject } from 'vue'
     import { type BlogWithUserName, type UserProfile } from '@/types'
     import { useRouter } from 'vue-router'
     import { useUserDataStore } from '@/store/userData'
@@ -54,6 +54,8 @@
     import setAllAttributeFalse from '@/utils/setAllAttributeFalse'
     import FavoritePart from '@/components/FavoritePart.vue'
     import MyBlogsPart from '@/components/MyBlogsPart.vue'
+
+    const baseUrl = inject('baseUrl')
 
     let arr = 0
     const router = useRouter()
@@ -75,7 +77,7 @@
     })
 
     async function toDO() {
-        userProfile.value = (await axios.get("http://localhost:8080/userprofile?name=" + name)).data;
+        userProfile.value = (await axios.get(baseUrl+"/userprofile?name=" + name)).data;
         userProfile.value.gender = genderToString(userProfile.value.gender as string)
     }
 

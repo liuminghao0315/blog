@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts" name="FavoritePart">
-    import { ref, onUpdated, onMounted, watch, toRef, toRefs } from 'vue'
+    import { ref, onUpdated, onMounted, watch, toRef, toRefs, inject } from 'vue'
     import { type BlogWithUserName, type UserProfile } from '@/types'
     import { useRouter } from 'vue-router'
     import { useUserDataStore } from '@/store/userData'
@@ -75,6 +75,8 @@
     import UserAvatar from '@/components/UserAvatar.vue'
     import axios from 'axios'
     import useFavoriteApi from '@/hooks/useFavoriteApi'
+
+    const baseUrl = inject('baseUrl')
 
     const router = useRouter()
 
@@ -222,7 +224,7 @@
     })
 
     async function getBlogs() {
-        paging.value = (await axios.get(`http://localhost:8080/bwun/findSortBy${sortName.value}?`, {
+        paging.value = (await axios.get(`${baseUrl}/bwun/findSortBy${sortName.value}?`, {
             params: {
                 sortFlag: sortFlag.value,
                 marchText: marchText.value,

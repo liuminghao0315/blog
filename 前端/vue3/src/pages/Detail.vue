@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts" name="Detail">
-    import { ref, onMounted, onBeforeMount, toRefs, onUpdated, watch, computed } from 'vue'
+    import { ref, onMounted, onBeforeMount, toRefs, onUpdated, watch, computed, inject } from 'vue'
     import { type BlogWithUserName, type StructuredComments, type CommentDO, type ArticleLikesDTO, type ArticleLikes, type FavoriteDTO } from "@/types"
     import axios from 'axios'
     import { storeToRefs } from 'pinia'
@@ -70,6 +70,8 @@
     import CommentsPart from '@/components/CommentsPart.vue'
     import { nanoid } from 'nanoid'
     import useFavoriteApi from '@/hooks/useFavoriteApi'
+
+    const baseUrl = inject('baseUrl')
 
     const commentInput = ref("")
     const router = useRouter();
@@ -141,8 +143,8 @@
     }
 
     async function todo() {
-        article.value = (await axios.get("http://localhost:8080/bwun/findbyid?id=" + id)).data;
-        articleLikesDTO.value = (await axios.get(`http://localhost:8080/db/articleLikes/getDTO?articleId=${id}&userId=${userData.value.id}`)).data
+        article.value = (await axios.get(baseUrl+"/bwun/findbyid?id=" + id)).data;
+        articleLikesDTO.value = (await axios.get(`${baseUrl}/db/articleLikes/getDTO?articleId=${id}&userId=${userData.value.id}`)).data
         let refs1 = toRefs(articleLikesDTO.value);
         likesNum = refs1.likesNum;
         myIncrement = refs1.myIncrement;
@@ -154,8 +156,8 @@
             favoriteUserId: route.query.favoriteUserId
         }
         lastAndNext.value = ifUseuserSpaceSortJS.value
-            ? (await axios.get(`http://localhost:8080/bwun/findLastAndNextRelyOn${userSpaceSortJS.value.sortName}ById`, { params })).data
-            : (await axios.get(`http://localhost:8080/bwun/findLastAndNextRelyOn${homeSortJS.value.sortName}ById`, { params })).data
+            ? (await axios.get(`${baseUrl}/bwun/findLastAndNextRelyOn${userSpaceSortJS.value.sortName}ById`, { params })).data
+            : (await axios.get(`${baseUrl}/bwun/findLastAndNextRelyOn${homeSortJS.value.sortName}ById`, { params })).data
         favoriteDTO.value = await getDTOFn(userData.value.id as string, id);
         const refs2 = toRefs(favoriteDTO.value)
         favoriteCount = refs2.favoriteCount;
@@ -198,9 +200,11 @@
         if (!option) {
             return;
         }
-        await axios.get("http://localhost:8080/db/commentLikes/deleteWhenDeleteArticle?articleId=" + article.value.id)
-        await axios.get("http://localhost:8080/db/comment/deleteByArticleId?id=" + article.value.id)
-        await axios.get("http://localhost:8080/db/blog/delete?id=" + id);
+        await axios.get(baseUrl+"/deleteBlog/blogsImages?blogId=" + article.value.id)
+
+        await axios.get(baseUrl+"/db/commentLikes/deleteWhenDeleteArticle?articleId=" + article.value.id)
+        await axios.get(baseUrl+"/db/comment/deleteByArticleId?id=" + article.value.id)
+        await axios.get(baseUrl+"/db/blog/delete?id=" + id);
         await deleteWhenDeleteArticle();
         alert("删除成功");
         router.push("/home")
@@ -288,11 +292,11 @@
             userId: userData.value.id,
             incrementNum,
         };
-        return (await axios.post("http://localhost:8080/db/articleLikes/add", articleLikes)).data;
+        return (await axios.post(baseUrl+"/db/articleLikes/add", articleLikes)).data;
     }
 
     async function deleteWhenCancel() {
-        return (await axios.get("http://localhost:8080/db/articleLikes/deleteWhenCancel", {
+        return (await axios.get(baseUrl+"/db/articleLikes/deleteWhenCancel", {
             params: {
                 articleId: id,
                 userId: userData.value.id,
@@ -301,7 +305,7 @@
     }
 
     async function deleteWhenDeleteArticle() {
-        return (await axios.get("http://localhost:8080/db/articleLikes/deleteWhenDeleteArticle", {
+        return (await axios.get(baseUrl+"/db/articleLikes/deleteWhenDeleteArticle", {
             params: {
                 articleId: id,
             }
@@ -309,7 +313,7 @@
     }
 
     async function update(incrementNum: number) {
-        return (await axios.get("http://localhost:8080/db/articleLikes/update", {
+        return (await axios.get(baseUrl+"/db/articleLikes/update", {
             params: {
                 articleId: id,
                 userId: userData.value.id,

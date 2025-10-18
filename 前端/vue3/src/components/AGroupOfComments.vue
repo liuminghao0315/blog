@@ -55,6 +55,8 @@
     import emitter from '@/utils/emitter'
     import isEmpty from '@/utils/isEmpty'
 
+    const baseUrl = inject('baseUrl')
+
     let structuredComments = inject("structuredComments-ref", ref())
 
     emitter.on('click-head-comment-reply-btn', () => {
@@ -151,11 +153,11 @@
             return;
         }
         replyCommentDTO.value.id = nanoid();
-        const responseMsg = (await axios.post('http://localhost:8080/db/commnet/add', replyCommentDTO.value)).data;
+        const responseMsg = (await axios.post(baseUrl+'/db/commnet/add', replyCommentDTO.value)).data;
         if (responseMsg == 1) {
             alert("发布成功")
             replyCommentDTO.value.content = "";
-            const newContents = (await axios.get("http://localhost:8080/findStructuredCommentWithUserNameAndAvatarUrl?articleId=" + id)).data
+            const newContents = (await axios.get(baseUrl+"/findStructuredCommentWithUserNameAndAvatarUrl?articleId=" + id)).data
             // console.log(newContents)
             structuredComments.value.splice(0, structuredComments.value.length);
             structuredComments.value.push(...newContents)
@@ -201,11 +203,11 @@
     async function deleteComment() {
         emitter.emit('click-non-head-comment-reply-btn')
         await deleteWhenDeleteRootComment();
-        const responseMsg = (await axios.get(`http://localhost:8080/db/comment/deleteByRootId?id=${headComment.id}`)).data
+        const responseMsg = (await axios.get(`${baseUrl}/db/comment/deleteByRootId?id=${headComment.id}`)).data
         // console.log(responseMsg)
         if (responseMsg > 0) {
             alert("删除成功");
-            const newContents = (await axios.get("http://localhost:8080/findStructuredCommentWithUserNameAndAvatarUrl?articleId=" + id)).data
+            const newContents = (await axios.get(baseUrl+"/findStructuredCommentWithUserNameAndAvatarUrl?articleId=" + id)).data
             structuredComments.value.splice(0, structuredComments.value.length);
             structuredComments.value.push(...newContents)
             // emitter.emit('update-a-group-of-comments', JSON.stringify(newContents))
@@ -315,11 +317,11 @@
             userId: userData.value.id,
             incrementNum,
         };
-        return (await axios.post("http://localhost:8080/db/commentLikes/add", commentLikes)).data;
+        return (await axios.post(baseUrl+"/db/commentLikes/add", commentLikes)).data;
     }
 
     async function deleteWhenCancel() {
-        return (await axios.get("http://localhost:8080/db/commentLikes/deleteWhenCancel", {
+        return (await axios.get(baseUrl+"/db/commentLikes/deleteWhenCancel", {
             params: {
                 commentId: headComment.id,
                 userId: userData.value.id,
@@ -328,7 +330,7 @@
     }
 
     async function deleteWhenDeleteRootComment() {
-        return (await axios.get("http://localhost:8080/db/commentLikes/deleteWhenDeleteRootComment", {
+        return (await axios.get(baseUrl+"/db/commentLikes/deleteWhenDeleteRootComment", {
             params: {
                 commentId: headComment.id,
             }
@@ -336,7 +338,7 @@
     }
 
     async function update(incrementNum: number) {
-        return (await axios.get("http://localhost:8080/db/commentLikes/update", {
+        return (await axios.get(baseUrl+"/db/commentLikes/update", {
             params: {
                 commentId: headComment.id,
                 userId: userData.value.id,

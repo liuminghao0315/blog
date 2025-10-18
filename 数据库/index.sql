@@ -51,16 +51,16 @@
 -- )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS  `article_likes`;
-CREATE TABLE `article_likes`(
-`id` VARCHAR(50),
-`article_id` VARCHAR (50),
-`user_id` VARCHAR(50),
-`increment_num` INT CHECK (`increment_num` IN (-1, 0, 1)),
-`gmt_created` datetime,
-`gmt_modified` datetime,
-PRIMARY KEY ( `id` )
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+-- DROP TABLE IF EXISTS  `article_likes`;
+-- CREATE TABLE `article_likes`(
+-- `id` VARCHAR(50),
+-- `article_id` VARCHAR (50),
+-- `user_id` VARCHAR(50),
+-- `increment_num` INT CHECK (`increment_num` IN (-1, 0, 1)),
+-- `gmt_created` datetime,
+-- `gmt_modified` datetime,
+-- PRIMARY KEY ( `id` )
+-- )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 -- DROP TABLE IF EXISTS  `comment_likes`;
@@ -122,54 +122,54 @@ PRIMARY KEY ( `id` )
 -- ('4' ,     '1',           '5',       '2',         '1',     '我要抬杠？', '2025-09-16 10:55:00', '2025-09-16 10:55:00');
 
 
-INSERT INTO `article_likes` (`id`, `article_id`, `user_id`, `increment_num`, `gmt_created`, `gmt_modified`)
-VALUES
-('1', '1', '1', 1, NOW(), NOW()),
-('2', '1', '2', -1, NOW(), NOW()),
-('3', '1', '3', 1, NOW(), NOW()),
-('4', '2', '1', -1, NOW(), NOW()),
-('5', '2', '2', 1, NOW(), NOW()),
-('6', '2', '3', -1, NOW(), NOW()),
-('7', '3', '4', 1, NOW(), NOW()),
-('8', '3', '5', -1, NOW(), NOW()),
-('9', '3', '1', 1, NOW(), NOW()),
-('10', '4', '2', -1, NOW(), NOW()),
-('11', '4', '3', 1, NOW(), NOW()),
-('12', '4', '4', -1, NOW(), NOW()),
-('13', '5', '5', 1, NOW(), NOW()),
-('14', '5', '1', -1, NOW(), NOW()),
-('15', '5', '2', 1, NOW(), NOW()),
-('16', '6', '3', -1, NOW(), NOW()),
-('17', '6', '4', 1, NOW(), NOW()),
-('18', '6', '5', -1, NOW(), NOW()),
-('19', '7', '1', 1, NOW(), NOW()),
-('20', '7', '2', -1, NOW(), NOW()),
-('21', '7', '3', 1, NOW(), NOW()),
-('22', '8', '4', -1, NOW(), NOW()),
-('23', '8', '5', 1, NOW(), NOW()),
-('24', '8', '1', -1, NOW(), NOW()),
-('25', '9', '2', 1, NOW(), NOW()),
-('26', '9', '3', -1, NOW(), NOW()),
-('27', '9', '4', 1, NOW(), NOW()),
-('28', '10', '5', -1, NOW(), NOW()),
-('29', '10', '1', 1, NOW(), NOW()),
-('30', '10', '2', -1, NOW(), NOW());
+-- INSERT INTO `article_likes` (`id`, `article_id`, `user_id`, `increment_num`, `gmt_created`, `gmt_modified`)
+-- VALUES
+-- ('1', '1', '1', 1, NOW(), NOW()),
+-- ('2', '1', '2', -1, NOW(), NOW()),
+-- ('3', '1', '3', 1, NOW(), NOW()),
+-- ('4', '2', '1', -1, NOW(), NOW()),
+-- ('5', '2', '2', 1, NOW(), NOW()),
+-- ('6', '2', '3', -1, NOW(), NOW()),
+-- ('7', '3', '4', 1, NOW(), NOW()),
+-- ('8', '3', '5', -1, NOW(), NOW()),
+-- ('9', '3', '1', 1, NOW(), NOW()),
+-- ('10', '4', '2', -1, NOW(), NOW()),
+-- ('11', '4', '3', 1, NOW(), NOW()),
+-- ('12', '4', '4', -1, NOW(), NOW()),
+-- ('13', '5', '5', 1, NOW(), NOW()),
+-- ('14', '5', '1', -1, NOW(), NOW()),
+-- ('15', '5', '2', 1, NOW(), NOW()),
+-- ('16', '6', '3', -1, NOW(), NOW()),
+-- ('17', '6', '4', 1, NOW(), NOW()),
+-- ('18', '6', '5', -1, NOW(), NOW()),
+-- ('19', '7', '1', 1, NOW(), NOW()),
+-- ('20', '7', '2', -1, NOW(), NOW()),
+-- ('21', '7', '3', 1, NOW(), NOW()),
+-- ('22', '8', '4', -1, NOW(), NOW()),
+-- ('23', '8', '5', 1, NOW(), NOW()),
+-- ('24', '8', '1', -1, NOW(), NOW()),
+-- ('25', '9', '2', 1, NOW(), NOW()),
+-- ('26', '9', '3', -1, NOW(), NOW()),
+-- ('27', '9', '4', 1, NOW(), NOW()),
+-- ('28', '10', '5', -1, NOW(), NOW()),
+-- ('29', '10', '1', 1, NOW(), NOW()),
+-- ('30', '10', '2', -1, NOW(), NOW());
 
-INSERT INTO article_likes (id, article_id, user_id, increment_num, gmt_created, gmt_modified)
-VALUES
-('9XITM88THfIlld4MJKDdFDYxJ0QvPwtd0HzFAlqe20bcauSNkY', '1', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('MNg9faUg2zaNjBUDydddsiHlzULNFSYeoHAjNGrjK6O9I1tRHZ', '10','system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('Pe1gL1iHx6GZ0TyZYnvrqAUzOGTRUEXLjnEl5OC2nbHFvoDiIT', '2', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('kagicKwF6tU8lNJ7ujJKlQRuKs9dciIORjYyxum4o5Hgc4mxSU', '3', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('MiyHxY0NL3sDZcAgcm9MXBIOYVoTrvaSCvs5ORvX2voxhNTJfq', '4', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('XNLi1EgZoJFQtMW55cP2gj4Lb1th34Sspx9ElEsJPLKGwuoP3x', '5', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('hIpJTpKi6utjVsdgRGkzBfwpHJ43yuAo8F0id2A9n8qkmqTz13', '6', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('NgtLxKmIebg4R8tNp8MgahRY13k4DtmDxvxn4kwRRExVpRxVP5', '7', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('rN9ZgbyNAxUCEY3PVJ9GQ4rBgqAbnIxttdgBelxUf626SCoBBb', '8', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('1ljsuHSorDJuPETmFwOiLHyNw7fHmoQbBakh5SvzHleT1S6trj', '9', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('MwJSIoUBiKNAjQ7Qqc8tZdTA0GmQJvm4KEMgm9ZaXFvlTDa1Nb', 'I4Jvgtx0M-X2BXiRSaB3n', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('ajsdkjawdklasjdawdjaksdjawlkdjaskjdlaksdksajxaksnn', '0ze5rMSp3eYl8lJUsLxQs', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
-('6LdF7g7pLwphJVSmWJBOEewrUYCMhCSxc61CaUzUaPKOS06TF3', 'KpqVdSiy0zSoBPqrtk2aK', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00');
+-- INSERT INTO article_likes (id, article_id, user_id, increment_num, gmt_created, gmt_modified)
+-- VALUES
+-- ('9XITM88THfIlld4MJKDdFDYxJ0QvPwtd0HzFAlqe20bcauSNkY', '1', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('MNg9faUg2zaNjBUDydddsiHlzULNFSYeoHAjNGrjK6O9I1tRHZ', '10','system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('Pe1gL1iHx6GZ0TyZYnvrqAUzOGTRUEXLjnEl5OC2nbHFvoDiIT', '2', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('kagicKwF6tU8lNJ7ujJKlQRuKs9dciIORjYyxum4o5Hgc4mxSU', '3', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('MiyHxY0NL3sDZcAgcm9MXBIOYVoTrvaSCvs5ORvX2voxhNTJfq', '4', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('XNLi1EgZoJFQtMW55cP2gj4Lb1th34Sspx9ElEsJPLKGwuoP3x', '5', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('hIpJTpKi6utjVsdgRGkzBfwpHJ43yuAo8F0id2A9n8qkmqTz13', '6', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('NgtLxKmIebg4R8tNp8MgahRY13k4DtmDxvxn4kwRRExVpRxVP5', '7', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('rN9ZgbyNAxUCEY3PVJ9GQ4rBgqAbnIxttdgBelxUf626SCoBBb', '8', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('1ljsuHSorDJuPETmFwOiLHyNw7fHmoQbBakh5SvzHleT1S6trj', '9', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('MwJSIoUBiKNAjQ7Qqc8tZdTA0GmQJvm4KEMgm9ZaXFvlTDa1Nb', 'I4Jvgtx0M-X2BXiRSaB3n', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('ajsdkjawdklasjdawdjaksdjawlkdjaskjdlaksdksajxaksnn', '0ze5rMSp3eYl8lJUsLxQs', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00'),
+-- ('6LdF7g7pLwphJVSmWJBOEewrUYCMhCSxc61CaUzUaPKOS06TF3', 'KpqVdSiy0zSoBPqrtk2aK', 'system', 0, '2025-09-25 00:00:00', '2025-09-25 00:00:00');
 
 
 
@@ -223,3 +223,17 @@ VALUES
 -- ('8', '3', '6', NOW(), NOW()),
 -- ('9', '4', '1', NOW(), NOW()),
 -- ('10', '5', '9', NOW(), NOW());
+
+
+DROP TABLE IF EXISTS  `blogs_images`;
+CREATE TABLE `blogs_images`(
+`id` VARCHAR(50),
+`author_id` VARCHAR (50),
+`blog_id` VARCHAR(50),
+`file_name` VARCHAR(40),
+`status` INT CHECK (`status` IN (0, 1, 2)),
+`gmt_created` datetime,
+`gmt_modified` datetime,
+PRIMARY KEY ( `id` )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

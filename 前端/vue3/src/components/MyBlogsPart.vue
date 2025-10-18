@@ -208,10 +208,12 @@
     // 以下完成筛选与排序
 
     import { type Blog, type User } from '@/types'
-    import { computed } from 'vue';
+    import { computed, inject } from 'vue';
     import { storeToRefs } from 'pinia';
     import useTimeOutRef from '@/hooks/useTimeOutRef'
     import OneBlog from '@/components/OneBlog.vue';
+
+    const baseUrl = inject('baseUrl')
 
     let { timeout: marchText } = useTimeOutRef(userSpaceSortJS.value.marchText, 700)
 
@@ -220,7 +222,7 @@
     })
 
     async function getBlogs() {
-        paging.value = (await axios.get(`http://localhost:8080/bwun/findSortBy${sortName.value}?`, {
+        paging.value = (await axios.get(`${baseUrl}/bwun/findSortBy${sortName.value}?`, {
             params: {
                 sortFlag: sortFlag.value,
                 marchText: marchText.value,

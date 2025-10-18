@@ -22,12 +22,14 @@
 </template>
 
 <script setup lang="ts" name="Register">
-    import { ref, onMounted } from 'vue'
+    import { ref, onMounted, inject } from 'vue'
     import axios from 'axios'
     import { type RegisterOrLoginForm } from '@/types'
     import isEmpty from '@/utils/isEmpty'
     import { useRegisterInfoStore } from '@/store/registerInfo'
     import { useLoginInfoStore } from '@/store/loginInfo'
+
+    const baseUrl = inject('baseUrl')
 
     const loginInfoStore = useLoginInfoStore();
     const registerInfoStore = useRegisterInfoStore()
@@ -56,7 +58,7 @@
         registerInfoStore.password = formJs.value.password;
         registerInfoStore.autoFillTime = 0
         try {
-            let responseMsg = (await axios.post("http://localhost:8080/db/user/add", {
+            let responseMsg = (await axios.post(baseUrl+"/db/user/add", {
                 userName: formJs.value.userName,
                 password: formJs.value.password
             })).data

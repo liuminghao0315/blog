@@ -11,5 +11,7 @@ pinia.use(piniaPluginPersistedstate)
 app.use(router)
 app.use(pinia)
 
-app.mount('#app')
+// 定义全局baseUrl
+app.provide('baseUrl', 'http://localhost:8080')
 
+app.mount('#app')

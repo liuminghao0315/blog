@@ -70,7 +70,7 @@
 
 <script setup lang="ts" name="Home">
     import { type Blog, type User, type BlogWithUserName, type Paging } from '@/types'
-    import { ref, onMounted, computed, watch, toRefs } from 'vue';
+    import { ref, onMounted, computed, watch, toRefs, inject } from 'vue';
     import axios from 'axios'
     import { useRefreshCountStore } from '@/store/refreshCount'
     import { useUserDataStore } from '@/store/userData';
@@ -78,6 +78,8 @@
     import useTimeOutRef from '@/hooks/useTimeOutRef'
     import OneBlog from '@/components/OneBlog.vue';
     import usePositiveIntegerRef from '@/hooks/usePositiveIntegerRef'
+
+    const baseUrl = inject('baseUrl')
 
     let articles = ref<Array<BlogWithUserName>>([])
     const refreshCountStore = useRefreshCountStore();
@@ -192,7 +194,7 @@
     // 以下完成筛选与排序
     let { timeout: marchText } = useTimeOutRef(homeSortJS.value.marchText, 700)
     async function getBlogs(marchText = "") {
-        paging.value = (await axios.get(`http://localhost:8080/bwun/findSortBy${sortName.value}?`, {
+        paging.value = (await axios.get(`${baseUrl}/bwun/findSortBy${sortName.value}?`, {
             params: {
                 sortFlag: sortFlag.value,
                 marchText,

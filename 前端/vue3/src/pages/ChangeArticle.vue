@@ -34,11 +34,13 @@
 
 <script setup lang="ts" name="Write">
     import { MdPreview } from 'md-editor-v3'
-    import { ref, onMounted } from 'vue'
+    import { ref, onMounted, inject } from 'vue'
     import axios from 'axios'
     import isEmpty from '@/utils/isEmpty'
     import { useUserDataStore } from "@/store/userData"
     import { useRouter } from 'vue-router'
+
+    const baseUrl = inject('baseUrl')
 
     const router = useRouter()
     const { id } = defineProps(['id'])
@@ -48,7 +50,7 @@
     let authorId: string;
 
     onMounted(async () => {
-        const originArticle = (await axios.get("http://localhost:8080/db/blog/findbyid?id=" + id)).data;
+        const originArticle = (await axios.get(baseUrl+"/db/blog/findbyid?id=" + id)).data;
         console.log(originArticle)
         authorId = originArticle.authorId;
         title.value = originArticle.title;
@@ -76,7 +78,7 @@
             return;
         }
         try {
-            const responseMsg = (await axios.post("http://localhost:8080/db/blog/update", {
+            const responseMsg = (await axios.post(baseUrl+"/db/blog/update", {
                 id,
                 title: title.value,
                 authorId: authorId,

@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts" name="EditPersonData">
-    import { ref, onMounted, watch, onUnmounted } from 'vue'
+    import { ref, onMounted, watch, onUnmounted, inject } from 'vue'
     import { type UserProfileWithUserName } from '@/types'
     import { useUserDataStore } from '@/store/userData'
     import { useRouter } from 'vue-router'
@@ -57,6 +57,8 @@
     import UserAvatar from '@/components/UserAvatar.vue'
     import moment from 'moment';
     import axios from 'axios'
+
+    const baseUrl = inject('baseUrl')
 
     const userAvatar = ref()
 
@@ -82,7 +84,7 @@
     let stopWatch: Function;
 
     onMounted(async () => {
-        userProfile.value = (await axios.get("http://localhost:8080/userprofile?name=" + name)).data;
+        userProfile.value = (await axios.get(baseUrl+"/userprofile?name=" + name)).data;
         userProfile.value.userName = name;
 
         // if (!userProfile.value.avatarUrl) {
@@ -124,7 +126,7 @@
             }
         }
 
-        const responseMsg = (await axios.post("http://localhost:8080/wpwun/update", {
+        const responseMsg = (await axios.post(baseUrl+"/wpwun/update", {
             id: userProfile.value.id,
             userName: userProfile.value.userName,
             userId: userProfile.value.userId,

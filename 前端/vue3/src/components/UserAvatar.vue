@@ -7,7 +7,9 @@
 </template>
 
 <script setup lang="ts" name="UserAvatar">
-    import { ref, onMounted, onUpdated, watch } from 'vue'
+    import { ref, onMounted, onUpdated, watch, inject } from 'vue'
+
+    const baseUrl = inject('baseUrl')
 
     const { url, pxNum } = defineProps(['url', 'pxNum'])
 
