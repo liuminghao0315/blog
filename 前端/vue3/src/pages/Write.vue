@@ -31,12 +31,13 @@
                 </div>
             </main>
             <aside>
-                <div class="arrow">
+                <div class="arrow" :style="{ backgroundImage: arrowComputed }" @mouseenter="isHoveredArrow = true"
+                    @mouseleave="isHoveredArrow = false" @click="changeArrow">
                 </div>
                 <!-- <div class="vertical-bar"> -->
 
                 <!-- </div> -->
-                <div class="right-aside">
+                <div class="right-aside" :style="{ display: rightAsideComputed }">
                     <div class="uploadImg">
                         点我上传
                         <br>
@@ -60,8 +61,12 @@
 </template>
 
 <script setup lang="ts" name="Write">
+    import arrowImg from '../assets/上一页.png'
+    console.log(arrowImg)
+
+
     import { MdPreview } from 'md-editor-v3'
-    import { ref, inject, onUnmounted, onBeforeUnmount } from 'vue'
+    import { ref, inject, onUnmounted, onBeforeUnmount, computed } from 'vue'
     import axios from 'axios'
     import { nanoid } from 'nanoid'
     import isEmpty from '@/utils/isEmpty'
@@ -183,6 +188,32 @@
 
     imgsList = ref<BlogsImages[]>([])
 
+    let isDisplaySider = ref(false);
+
+    let isHoveredArrow = ref(false)
+
+    const arrowComputed = computed(() => {
+        if (isDisplaySider.value) {
+            if (isHoveredArrow.value) {
+                return `url(/src/assets/下一页（mouseOn）.png)`
+            }
+            return `url(/src/assets/下一页.png)`
+        } else {
+            if (isHoveredArrow.value) {
+                return `url(/src/assets/上一页（mouseOn）.png)`
+            }
+            return `url(/src/assets/上一页.png)`
+        }
+    })
+
+    const rightAsideComputed = computed(() => {
+        if (isDisplaySider.value) {
+            return `flex`
+        } else {
+            return `none`
+        }
+    })
+
     async function uploadFiles(event: any) {
         const files = event.target.files;
         for (const file of files) {
@@ -254,6 +285,13 @@
     async function copyMarkdown(path: string) {
         await navigator.clipboard.writeText(`![](${path})`);
     }
+
+    function changeArrow() {
+        isDisplaySider.value = !isDisplaySider.value;
+        console.log(isDisplaySider.value)
+    }
+
+
 </script>
 
 <style lang="scss" scoped>
@@ -271,7 +309,7 @@
 }
 
 .main-part {
-    width: 95vw;
+    width: calc(95vw - 1.1734294px);
     margin: 0 auto;
     background-color: aliceblue;
     display: flex;
@@ -331,10 +369,14 @@
             align-self: center;
             width: 15px;
             height: 60px;
-            background: url("../assets/上一页.png") center center/ 100% no-repeat;
+            // background-image: url('/src/assets/上一页.png');
+            background-position: center center;
+            background-size: 100%;
+            background-repeat: no-repeat;
+            cursor: pointer;
 
             &:hover {
-                background-image: url("../assets/上一页(mouseOn).png");
+                background-image: url('/src/assets/上一页（mouseOn）.png');
             }
 
             // background-color: orange;

@@ -281,7 +281,7 @@
             background: url("../assets/上一页.png") center center/35% no-repeat;
 
             &:hover {
-                background-image: url("../assets/上一页(mouseOn).png");
+                background-image: url("../assets/上一页（mouseOn）.png");
             }
         }
 
@@ -305,7 +305,7 @@
             background: url("../assets/下一页.png") center center/35% no-repeat;
 
             &:hover {
-                background-image: url("../assets/下一页(mouseOn).png");
+                background-image: url("../assets/下一页（mouseOn）.png");
             }
         }
 
@@ -313,7 +313,7 @@
             background: url("../assets/分页菜单设置.png") center center/55% no-repeat;
 
             &:hover {
-                background-image: url("../assets/分页菜单设置(mouseOn).png")
+                background-image: url("../assets/分页菜单设置（mouseOn）.png")
             }
         }
 
