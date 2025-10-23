@@ -83,13 +83,16 @@
 
     let articles = ref<Array<BlogWithUserName>>([])
     const refreshCountStore = useRefreshCountStore();
-    let { homeSortJS, homePagingJS } = storeToRefs(useUserDataStore())
+    let { homeSortJS, homePagingJS, userData } = storeToRefs(useUserDataStore())
 
     onMounted(async () => {
         if (refreshCountStore.login_to_home_count == 0) {
             refreshCountStore.login_to_home_count++
         }
         articles.value = await getBlogs(marchText.value)
+        if(userData.value?.id!=undefined){
+            await axios.get(`${baseUrl}/deleteRedundantBlogsImages/blogsImages?authorId=${userData.value.id}`)
+        }
     })
 
 

@@ -1,19 +1,33 @@
 <template>
     <div id="ImagePreview">
         <div :style="{ backgroundImage: urlText }" class="img"></div>
-        <div class="cancel" @click="cancelImg"></div>
+        <div class="cancel" @click="cancelImg" v-if="canCancel"></div>
+        <div class="forbid" v-if="!canCancel" title="请先删除图片对应的markdown"></div>
+        <!-- <button @click="console.log(canCancel)">点我查看是否可以删除</button> -->
     </div>
 </template>
 
 <script lang="ts" setup name="ImagePreview">
-    const BASE_PATH = "D:\\360MoveData\\Users\\23793\\Desktop\\博客网站\\七代版本-加入分页系统\\后端\\blog_project\\src\\main\\resources\\images\\"
+    import { inject,ref, watchEffect } from 'vue'
 
-    const { url,id } = defineProps(['url','id'])
+    const baseUrl = inject('baseUrl')
+    const BASE_PATH = baseUrl + "/images/"
+
+    const props = defineProps(['fileName', 'id', 'content'])
+    const { fileName, id } = props;
+
+    let canCancel = ref(true)
+
+    watchEffect(()=>{
+    canCancel.value = props.content===undefined || props.content.indexOf(fileName)===-1
+    })
+    // console.log(props.content)
+
     const emit = defineEmits(['cancelImg'])
-    const urlText = `url(${url})`
-    // console.log(JSON.stringify(url))
-    function cancelImg(){
-        emit('cancelImg',id)
+    const urlText = `url(${fileName})`
+    // console.log(JSON.stringify(fileName))
+    function cancelImg() {
+        emit('cancelImg', id)
     }
 </script>
 
@@ -32,15 +46,19 @@
         margin: 0 3px;
     }
 
-    div.cancel {
+    div.cancel,div.forbid {
         position: absolute;
         background: url("../assets/取消按钮.png") center center/cover no-repeat;
-        left:-5px;
-        top:-5px;
-        height:20px;
-        width:20px;
+        left: -5px;
+        top: -5px;
+        height: 20px;
+        width: 20px;
         border-radius: 50%;
         cursor: pointer;
+    }
+
+    div.forbid{
+        background-image: url("../assets/禁止.png");
     }
 }
 </style>

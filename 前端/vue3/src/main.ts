@@ -12,6 +12,8 @@ app.use(router)
 app.use(pinia)
 
 // 定义全局baseUrl
-app.provide('baseUrl', 'http://localhost:8080')
+app.provide('baseUrl', 'http://114.55.245.132:8080')
+// app.provide('baseUrl', 'http://localhost:8080')
+
 
 app.mount('#app')

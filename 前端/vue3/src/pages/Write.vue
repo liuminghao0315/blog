@@ -49,7 +49,8 @@
                     <div class="imgs-list">
                         <div v-for="(oneLine, index) in imgsList" :key="oneLine.id" class="oneLine">
                             <div class="index">{{ index + 1 }}.</div>
-                            <ImagePreview :url="oneLine.fileName" :id="oneLine.id" @cancelImg="cancelImg($event)">
+                            <ImagePreview :fileName="BASE_PATH + oneLine.fileName" :id="oneLine.id"
+                                @cancelImg="cancelImg($event)" :content="content">
                             </ImagePreview>
                             <div class="btn" @click="copyMarkdown(oneLine.fileName)">复制Markdown</div>
                         </div>
@@ -66,7 +67,7 @@
 
 
     import { MdPreview } from 'md-editor-v3'
-    import { ref, inject, onUnmounted, onBeforeUnmount, computed } from 'vue'
+    import { ref, inject, onUnmounted, onBeforeUnmount, computed, watch } from 'vue'
     import axios from 'axios'
     import { nanoid } from 'nanoid'
     import isEmpty from '@/utils/isEmpty'
@@ -82,12 +83,13 @@
     let summary = ref<string>();
     let content = ref<string>();
     const id = nanoid();
+    const authorId = useUserDataStore().userData.id;
 
     let submitLock = ref<number>(0);
 
     let isSaveBlogWhenExit = false;
 
-    const BASE_PATH = "D:\\360MoveData\\Users\\23793\\Desktop\\博客网站\\七代版本-加入分页系统\\后端\\blog_project\\src\\main\\resources\\images\\"
+    const BASE_PATH = baseUrl + "/images/"
 
     async function submit() {
         if (submitLock.value === 1) {
@@ -219,7 +221,7 @@
         for (const file of files) {
             const formData = new FormData();
             formData.append("file", file);
-            const responseMsg = (await axios.post(`${baseUrl}/upload/blogsImages?authorId=${useUserDataStore().userData.id}&blogId=${id}&id=${nanoid()}`, formData, {
+            const responseMsg = (await axios.post(`${baseUrl}/upload/blogsImages?authorId=${authorId}&blogId=${id}&id=${nanoid()}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
@@ -237,7 +239,7 @@
                 // console.log("true!")
                 return true;
             } else {
-                axios.get(`${baseUrl}/deleteOne/blogsImages?fileName=${theImg.fileName}`);
+                axios.get(`${baseUrl}/deleteOne/blogsImages?fileName=${theImg.fileName}&authorId=${authorId}`);
                 // console.log("false!")
                 return false;
             }
@@ -251,8 +253,13 @@
             console.log("内层——1")
             let fileNames_save: string | string[] = [];
             let fileNames_delete: string | string[] = [];
+
+            console.log("imgsList.value", JSON.stringify(imgsList.value))
+            console.log("content.value", JSON.stringify(content.value))
+            console.log("content.value?.indexOf(imgsList.value[0].fileName)", content.value?.indexOf(imgsList.value[0].fileName))
+
             for (let file of imgsList.value) {
-                if (content.value?.indexOf(`](${file.fileName})`) != -1) {
+                if (content.value?.indexOf(file.fileName) != -1) {
                     fileNames_save.push(file.fileName);
                 } else {
                     fileNames_delete.push(file.fileName)
@@ -262,13 +269,13 @@
             console.log("fileNames_delete = " + fileNames_delete)
             if (fileNames_save.length > 0 && fileNames_delete.length > 0) {
                 await Promise.all([
-                    axios.get(`${baseUrl}/updateSeveral/blogsImages?fileNames=${fileNames_save.join(",")}`),
-                    axios.get(`${baseUrl}/deleteSeveral/blogsImages?fileNames=${fileNames_delete.join(",")}`)
+                    axios.get(`${baseUrl}/updateSeveral/blogsImages?fileNames=${fileNames_save.join(",")}&authorId=${authorId}`),
+                    axios.get(`${baseUrl}/deleteSeveral/blogsImages?fileNames=${fileNames_delete.join(",")}&authorId=${authorId}`)
                 ])
             } else if (fileNames_save.length > 0) {
-                await axios.get(`${baseUrl}/updateSeveral/blogsImages?fileNames=${fileNames_save.join(",")}`);
+                await axios.get(`${baseUrl}/updateSeveral/blogsImages?fileNames=${fileNames_save.join(",")}&authorId=${authorId}`);
             } else if (fileNames_delete.length > 0) {
-                await axios.get(`${baseUrl}/deleteSeveral/blogsImages?fileNames=${fileNames_delete.join(",")}`)
+                await axios.get(`${baseUrl}/deleteSeveral/blogsImages?fileNames=${fileNames_delete.join(",")}&authorId=${authorId}`)
             }
         } else {
             console.log("内层——2")
@@ -278,19 +285,18 @@
             }
             fileNames = fileNames.join(",")
             console.log("fileNames = " + fileNames)
-            await axios.get(`${baseUrl}/deleteSeveral/blogsImages?fileNames=${fileNames}`)
+            await axios.get(`${baseUrl}/deleteSeveral/blogsImages?fileNames=${fileNames}&authorId=${authorId}`)
         }
     })
 
     async function copyMarkdown(path: string) {
-        await navigator.clipboard.writeText(`![](${path})`);
+        await navigator.clipboard.writeText(`![](${BASE_PATH + path})`);
     }
 
     function changeArrow() {
         isDisplaySider.value = !isDisplaySider.value;
         console.log(isDisplaySider.value)
     }
-
 
 </script>
 
